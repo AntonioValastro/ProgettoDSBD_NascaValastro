@@ -1,0 +1,120 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-backend
+spec:
+  ports:
+    - port: 8080
+      targetPort: 5000
+  selector:
+    app: login-backend
+  type: LoadBalancer
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+spec:
+  ports:
+    - port: 80
+  selector:
+    app: frontend
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: gateway-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "PUT, GET, POST, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+    nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
+spec:
+  rules:
+    - host: myproject.loc
+      http:
+        paths:
+          - path: /login
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: user-backend
+                port:
+                  number: 5000
+          - path: /
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: frontend
+                port:
+                  number: 80
+          - path: /post
+            pathType: Prefix
+            backend:
+              service:
+                name: post-backend
+                port:
+                  number: 5000
+          - path: /follow
+            pathType: Prefix
+            backend:
+              service:
+                name: follow-backend
+                port:
+                  number: 5000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user
+spec:
+  revisionHistoryLimit: 3
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: login-backend
+  template:
+    metadata:
+      labels:
+        app: login-backend
+    spec:
+      containers:
+        - name: login-backend
+          image: login-stateless:v1
+          ports:
+            - containerPort: 5000
+          livenessProbe:
+            httpGet:
+              port: 5000
+              path: /ping
+            initialDelaySeconds: 20
+            periodSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              port: 5000
+              path: /ping
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 5
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: login-frontend:v1
+          ports:
+            - containerPort: 5000

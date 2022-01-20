@@ -1,0 +1,47 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: follow-backend
+spec:
+  ports:
+    - port: 8080
+      targetPort: 5000
+  selector:
+    app: follow-backend
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: follow
+spec:
+  revisionHistoryLimit: 3
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: follow-backend
+  template:
+    metadata:
+      labels:
+        app: follow-backend
+    spec:
+      containers:
+        - name: follow-backend
+          image: follow-stateless:v1
+          ports:
+            - containerPort: 8080
+          livenessProbe:
+            httpGet:
+              port: 5000
+              path: /ping
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              port: 5000
+              path: /ping
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 5

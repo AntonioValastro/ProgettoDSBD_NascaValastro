@@ -1,0 +1,4 @@
+Flask
+netifaces
+requests
+Flask-PyMongo

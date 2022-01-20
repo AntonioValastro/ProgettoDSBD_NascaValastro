@@ -1,0 +1,117 @@
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+<!-- Optional theme -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+</head>
+<body>
+    <div class="container">
+    	<div class="header">
+    	<h1>MyHub</h1>
+    	</div>
+        <div class="row">
+            <div class="col">
+            	<input type="text" id = "username" placeholder="Username">
+            	<input type="password" id = "password" placeholder="Password">
+                <a href="#" id="query-btn" class="btn btn-primary">login</a>
+                <a href="#" id="query-registrazione">Registrazione</a>
+            </div>
+            <div class="col-sm-12 text-center">
+                <span id="query-response"></span>
+            </div>
+        </div>
+    </div>
+</body>
+<style>
+.container{
+display:flex;
+flex-direction:column;
+justify-content:space-around;
+padding:1em;
+margin:0.5em;
+align-items: center;
+}
+.header{
+width:100%;
+text-align: center;
+margin: 1em 0;
+}
+.col{
+display:flex;
+flex-direction:column;
+justify-content:space-around;
+margin:0.3em;
+width: 15em;
+height: 10em;
+}
+body{
+display:flex;
+flex-direction:column;
+margin:0;
+align-content:center;
+align-items: center;
+}
+</style>
+<script>
+const button = document.getElementById("query-btn");
+button.addEventListener("click", login)
+
+const buttonReg = document.getElementById("query-registrazione");
+buttonReg.addEventListener("click", registrazione)
+
+function login(event){
+let username = document.getElementById("username").value;
+console.log(username);
+let password = document.getElementById("password").value;
+console.log(password);
+x=username+"&"+password
+$.ajax({
+		type: "GET",
+		crossDomain: true,
+                url: "http://localhost/user/login",
+                data: {"username":username,"password":password},
+                dataType: "html",
+                success: function (data) {
+                    console.log(data);
+                    if(data=='0'){
+                    	 $("#query-response").html("Accesso negato!");
+                    }
+                   
+                    if(data=='1')
+                    	window.location.href="home.html";
+
+                }
+            });    
+}
+function registrazione(event){
+let username = document.getElementById("username").value;
+console.log(username);
+let password = document.getElementById("password").value;
+console.log(password);
+x=username+"&"+password
+$.ajax({
+		type: "GET",
+		crossDomain: true,
+                url: "http://localhost/user/registrazione",
+                data: {"username":username,"password":password},
+                dataType: "html",
+                success: function (data) {
+                    console.log(data);
+                    $("#query-response").html(data);
+                    //if(data=='1')
+                    	//window.location.href="home.html";
+
+                }
+            });    
+}
+</script>
+</html>

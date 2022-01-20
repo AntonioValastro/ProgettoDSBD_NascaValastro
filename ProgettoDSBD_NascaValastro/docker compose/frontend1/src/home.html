@@ -1,0 +1,349 @@
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+<!-- Optional theme -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+</head>
+<body>
+    <div class="container">
+    	<div class="header">
+    	<h1>MyHub Home</h1>
+    	<img src="https://cutewallpaper.org/24/create-icon-from-png/create-file-icon-download-in-glyph-style.png" alt="Crea post" class="img" id = "post_icon" onclick="showPost()">
+    	<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Home_Icon.svg/2048px-Home_Icon.svg.png" alt="Home" class="img" id = "home_icon" onclick="showHome()">
+    	<img src="https://image.flaticon.com/icons/png/512/33/33715.png" alt="Cerca utenti" class="img" id = "follow_icon" onclick="showFollow()">
+    	<img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSOGXTs4UKffySPwiJ2XgsiYD8iHIdJQb_tFpEvifJTGGVrh5uBPKrbz08Saii1XVxHsuM&usqp=CAU" alt="Logout" class="img" id = "logout_icon" onclick="logout()">
+    	</div>
+        <div class="row">
+            <div class="col" id = "follow_section">
+           	
+            </div>
+            <div class="col" id = "home_section">
+            <h2>home</h2>
+            </div>
+            <div class="col" id = "post_section">
+            <label><input type = "text" placeholder="Titolo" id = "post_titolo"></label>
+            <label><input type = "text" placeholder="Tag" id = "post_tag"></label>
+            <label><input type = "text" placeholder="Url" id = "post_url"></label>
+            <label><textarea rows = "10" cols="40" placeholder="Descrizione..." id = "post_descrizione"></textarea></label>
+            <button id = "post_button">Crea Post</button>
+            </div>
+            <div class="col-sm-12 text-center">
+                <span id="query-response"></span>
+            </div>
+        </div>
+    </div>
+</body>
+<style>
+.container{
+display:flex;
+flex-direction:column;
+justify-content:space-around;
+padding:1em;
+margin:0.5em;
+align-items: center;
+}
+.col{
+display:flex;
+flex-direction:column;
+justify-content:space-around;
+padding:1em;
+margin:0.5em;
+align-items: center;
+}
+.header{
+width:100%;
+text-align: center;
+margin: 1em 0;
+}
+.user_result{
+width: 15em;
+display: flex;
+justify-content: space-around;
+align-items: center;
+align-content: center;
+margin: 1em;
+border: 2px solid black;
+padding: 1em 0.5em;
+box-shadow: 3px 3px 2px grey;
+text-shadow: 2px 2px #dedede;
+}
+.img_result{
+height: 5em;}
+body{
+display:flex;
+flex-direction:column;
+margin:0;
+align-content:center;
+align-items: center;
+text-shadow: 2px 2px #dedede;
+}
+.post{
+width: 80%;
+display:flex;
+flex-direction: column;
+align-content: center;
+margin: 1.5em 1em;
+padding: 1em;
+border: 2px solid black;
+box-shadow: 3px 3px 3px 2px grey;
+text-shadow: 2px 2px #dedede;
+}
+.post_titolo {
+font-size: 2em;
+font-weight: bold;
+margin: bottom: 0.5em;
+}
+.post_url {
+color: blue;
+margin: 0.3em;
+}
+.post_tag{
+font-style: Italic;
+color: #2f4f4f
+}
+.post_user {
+color: black;
+text-align:right;
+width: 100%;
+font-style: Italic;
+font-size: 1.2em;
+}
+.img{
+height: 50px;
+width: 50px;
+}
+.img_selezionata{
+height: 100px;
+width: 100px;
+}
+.hidden{
+display: none;
+}
+
+</style>
+<script>
+let user;
+const follow_section = document.getElementById("follow_section");
+const post_section = document.getElementById("post_section");
+const home_section = document.getElementById("home_section");
+const follow_icon = document.getElementById("follow_icon");
+const post_icon = document.getElementById("post_icon");
+const home_icon = document.getElementById("home_icon");
+const logout_icon = document.getElementById("logout_icon");
+follow_section.classList.add("hidden");
+post_section.classList.add("hidden");
+home_section.classList.add("hidden");
+$.ajax({
+		type: "GET",
+		crossDomain: true,
+                url: "http://localhost/user/flag",
+                success: function (data) {
+                    console.log(data);
+                    user=data;
+                    console.log("corretto");
+                    $("#query-response").html(data);
+                    $.ajax({
+			type: "GET",
+			crossDomain: true,
+                	url: "http://localhost/post/setUser",
+                	data: {"user":user},
+                	dataType: "html",
+                	success: function (data2) {
+                    	console.log(data2);
+                }
+                
+            }); 
+                $.ajax({
+			type: "GET",
+			crossDomain: true,
+                	url: "http://localhost/follow/setUser",
+                	data: {"user":user},
+                	dataType: "html",
+                	success: function (data2) {
+                    	console.log(data2);
+                }
+                
+            });
+            showHome();
+            
+                },
+                error: function (error){
+                	console.log("errore");
+                	window.location.href="/";
+                }
+            });
+function addFollow(event){
+let userCorrente = event.currentTarget.id;
+let img=event.currentTarget;
+console.log("current target :" + userCorrente)
+$.ajax({
+		type: "GET",
+		crossDomain: true,
+                url: "http://localhost/follow/addFollow",
+                data: {"user":user,"targetId":userCorrente},
+                dataType: "html",
+                success: function (data) {
+                    console.log(data);
+                    if(data=="Friends!"){
+                    	console.log(img);
+                    	img.src="https://static.thenounproject.com/png/682464-200.png";
+                    }
+                }
+            }); 
+}
+const button = document.getElementById("post_button");
+button.addEventListener("click", crea_post)
+
+function crea_post(event){
+let titolo = document.getElementById("post_titolo").value;
+console.log(titolo);
+let url = document.getElementById("post_url").value;
+console.log(url);
+let tag = document.getElementById("post_tag").value;
+console.log(tag);
+let descrizione = document.getElementById("post_descrizione").value;
+console.log(descrizione);
+$.ajax({
+		type: "GET",
+		crossDomain: true,
+                url: "http://localhost/post/creaPost",
+                data: {"titolo":titolo,"url":url,"descrizione":descrizione,"user":user,"tag":tag},
+                dataType: "html",
+                success: function (data) {
+                    console.log(data);
+                    $("#query-response").html(data);
+                }
+            });    
+}
+function showFollow(){
+follow_section.classList.remove("hidden");
+post_section.classList.add("hidden");
+home_section.classList.add("hidden");
+follow_icon.classList.add("img_selezionata");
+post_icon.classList.remove("img_selezionata");
+home_icon.classList.remove("img_selezionata");
+logout_icon.classList.remove("img_selezionata");
+		console.log("user: "+ user);
+		$.ajax({
+			type: "GET",
+			crossDomain: true,
+                	url: "http://localhost/follow/showUsers",
+                	data: {"user":user},
+                	dataType: "html",
+                	success: function (data) {
+                	$("#query-response").html("");
+                    	console.log(data);
+                    	follow_section.innerHTML="";
+                    	let result = JSON.parse(data);
+                    	for(let i=0; i<result.length; i++){
+                    		let box = document.createElement("div");
+                    		let image = document.createElement("img");
+                    		let name = document.createElement("div");
+                    		
+                    		box.classList.add("user_result");
+                    		image.classList.add("img_result");
+                    		name.classList.add("name_result");
+                    		
+                    		image.id=result[i].id;
+                    		image.addEventListener("click",addFollow);
+                    		name.textContent=result[i].username;
+                    		image.src="https://aux.iconspalace.com/uploads/add-user-icon-256.png";
+                    		box.append(image);
+                    		box.append(name);
+                    		follow_section.append(box);
+                    	}
+                	}
+            	}); 
+}
+function showPost(){
+follow_section.classList.add("hidden");
+home_section.classList.add("hidden");
+post_section.classList.remove("hidden");
+follow_icon.classList.remove("img_selezionata");
+post_icon.classList.add("img_selezionata");
+home_icon.classList.remove("img_selezionata");
+logout_icon.classList.remove("img_selezionata");
+$("#query-response").html("");
+}
+function showHome(){
+follow_section.classList.add("hidden");
+post_section.classList.add("hidden");
+home_section.classList.remove("hidden");
+follow_icon.classList.remove("img_selezionata");
+post_icon.classList.remove("img_selezionata");
+logout_icon.classList.remove("img_selezionata");
+home_icon.classList.add("img_selezionata");
+		console.log("user: "+ user);
+		$.ajax({
+			type: "GET",
+			crossDomain: true,
+                	url: "http://localhost/post/showPosts",
+                	data: {"user":user},
+                	dataType: "html",
+                	success: function (data) {
+                    	console.log(data);
+                    	home_section.innerHTML="";
+                    	let result = JSON.parse(data);
+                    	$("#query-response").html("");
+                    	for(let i=0; i<result.length; i++){
+                    		let boxPost = document.createElement("div");
+				let titoloPost = document.createElement("div");
+				let urlPost = document.createElement("a");
+				let descrizionePost = document.createElement("p");
+				let userPost=document.createElement("p");
+				let userTag=document.createElement("p");
+
+
+
+				boxPost.classList.add("post");
+				titoloPost.classList.add("post_titolo");
+				urlPost.classList.add("post_url");
+				descrizionePost.classList.add("post_descrizione");
+				userPost.classList.add("post_user");
+				userTag.classList.add("post_tag");
+
+
+				titoloPost.textContent = result[i].titolo;
+				userTag.textContent="@" +result[i].tag;
+				urlPost.textContent = result[i].url;
+				descrizionePost.textContent = result[i].descrizione;
+				userPost.textContent="by " + result[i].username;
+
+
+				urlPost.href = result[i].url;
+
+
+				boxPost.appendChild(userPost);
+				boxPost.appendChild(titoloPost);
+				if(result[i].tag != "Null")
+					boxPost.appendChild(userTag);
+				boxPost.appendChild(urlPost);
+				boxPost.appendChild(descrizionePost);
+				home_section.appendChild(boxPost);
+                    	}
+                	}
+            	}); 
+}
+function logout(){
+follow_section.classList.add("hidden");
+post_section.classList.add("hidden");
+home_section.classList.add("hidden");
+follow_icon.classList.remove("img_selezionata");
+post_icon.classList.remove("img_selezionata");
+logout_icon.classList.add("img_selezionata");
+home_icon.classList.remove("img_selezionata");
+user = null;
+console.log("errore, cookie cancellati: " + user);
+window.location.href="/";
+}
+</script>
+</html>

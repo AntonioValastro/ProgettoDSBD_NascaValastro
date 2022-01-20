@@ -1,0 +1,71 @@
+version: '3.3'
+
+services:
+  mysql-login:
+    container_name: mysql-login
+    image: mysql:5.6
+    volumes:
+      - ./db_data:/var/lib/mysql
+      - ./mnt/datalogin
+    ports:
+      - "3306:3306"
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: pwd
+      MYSQL_DATABASE: dsbd_login
+      
+  mysql-post:
+    container_name: mysql-follow
+    image: mysql:5.6.51
+    volumes:
+      - ./db_data_post:/var/lib/mysql
+      - ./mnt/datafollow
+    ports:
+      - "3307:3406"
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: pwd
+      MYSQL_DATABASE: dsbd_follow
+      
+  mongo:
+    container_name: mongo
+    image: mongo:3.6
+    restart: always
+    volumes:
+      - ./init-mongo.js:/docker-entrypoint-initdb.d/init-mongo-js:ro
+      - ./mongo-volume:/data/db
+    ports:
+      - "27017:27017"
+      
+  frontend:
+    container_name: frontend
+    image: frontend
+    build: ./frontend1
+    ports:
+      - 80:80
+    restart: always
+  
+  login:
+    container_name: user
+    build: ./pythonuser1
+    ports:
+      - 8082:5000
+    environment:
+      http.cors.allow-origin : "*"
+      http.cors.enabled : 'true'
+      http.cors.allow-methods : OPTIONS,HEAD,GET,POST,PUT,DELETE
+    restart: always
+  
+  post:
+    container_name: post
+    build: ./pythonpost1
+    ports:
+      - 8083:5000
+    restart: always
+      
+  follow:
+    container_name: follow
+    build: ./pythonfollow1
+    ports:
+      - 8084:5000
+    restart: always

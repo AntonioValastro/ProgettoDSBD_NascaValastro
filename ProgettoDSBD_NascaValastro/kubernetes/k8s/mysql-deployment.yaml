@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-login
+spec:
+  selector:
+    matchLabels:
+      app: mysql-login
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: mysql-login
+    spec:
+      containers:
+      - image: mysql:5.6
+        name: mysql-login
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: password
+        ports:
+        - containerPort: 3306
+          name: mysql-login
+        volumeMounts:
+        - name: mysql-persistent-storage-loginservice
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: mysql-persistent-storage-loginservice
+        persistentVolumeClaim:
+          claimName: mysql-pv-claim-loginservice
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-login
+spec:
+  ports:
+  - port: 3306
+  selector:
+    app: mysql-login
